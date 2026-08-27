@@ -2,17 +2,9 @@ import { useEffect, useState } from "react";
 import { ScrollText, Network as NetworkIcon, Cpu, Route } from "lucide-react";
 import type { AuditEntry, Turn } from "../../lib/types";
 import { MODELS, NETWORK_ALLOWLIST } from "../../lib/data";
+import { AuditFeed, LiveBadge } from "../common/AuditFeed";
 
 type Tab = "audit" | "network" | "models";
-
-const CATEGORY_COLOR: Record<AuditEntry["category"], string> = {
-  routing: "var(--brand-600)",
-  tool: "var(--text-tertiary)",
-  security: "var(--alert-600)",
-  approval: "var(--copper-600)",
-  export: "var(--safe-600)",
-  system: "var(--text-tertiary)",
-};
 
 export function RightRail({ auditLog, activeTurn }: { auditLog: AuditEntry[]; activeTurn?: Turn }) {
   const [tab, setTab] = useState<Tab>("audit");
@@ -53,24 +45,11 @@ function RailTab({ active, icon: Icon, label, onClick }: { active: boolean; icon
 
 function AuditTab({ entries }: { entries: AuditEntry[] }) {
   return (
-    <div className="flex-1 overflow-y-auto px-3 py-3">
-      {entries.length === 0 ? (
-        <p className="px-1 text-[12px] leading-relaxed" style={{ color: "var(--text-tertiary)" }}>
-          Audit entries appear here as tasks run: routing decisions, tool calls, security checks and approvals.
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2.5">
-          {[...entries].reverse().map((e) => (
-            <li key={e.id} className="animate-fade-in flex gap-2.5">
-              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: CATEGORY_COLOR[e.category] }} />
-              <div className="min-w-0">
-                <p className="mono text-[10.5px]" style={{ color: "var(--text-tertiary)" }}>{e.time} · {e.actor}</p>
-                <p className="text-[12px] leading-snug" style={{ color: "var(--text-primary)" }}>{e.message}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b px-3 py-2" style={{ borderColor: "var(--border-subtle)" }}>
+        <LiveBadge count={entries.length} />
+      </div>
+      <AuditFeed entries={entries} />
     </div>
   );
 }
@@ -193,6 +172,7 @@ function ModelsTab({ activeTurn }: { activeTurn?: Turn }) {
                 <span>{m.vram} VRAM</span>
                 <span>{m.latencyMs}ms p50</span>
               </div>
+              <p className="mt-1.5 text-[10px]" style={{ color: "var(--olive-600)" }}>Open weight · {m.license}</p>
             </li>
           );
         })}

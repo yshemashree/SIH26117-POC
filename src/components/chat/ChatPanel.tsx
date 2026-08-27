@@ -5,227 +5,255 @@ import {
   ListChecks,
   Wrench,
   Brain,
-  UserCheck,
-  Quote,
   CheckCircle2,
   XCircle,
   X,
   Library,
+  ChevronRight,
+  UserCheck,
 } from "lucide-react";
 import type { AgentStep, Turn } from "../../lib/types";
 import { SCENARIOS, MODELS, KB_DOCS } from "../../lib/data";
 import { CodeBlock } from "../common/CodeBlock";
+import { CitationRow } from "../common/CitationRow";
+import { ScanPreview } from "../common/ScanPreview";
 import { DeliverableCard } from "./DeliverableCard";
-import { useAuth } from "../../lib/auth";
+import { RakshakaMark } from "../common/Logo";
 
 interface PendingFile {
   name: string;
   folder?: string;
 }
 
-const STEP_META: Record<AgentStep["kind"], { icon: typeof ListChecks; label: string }> = {
-  plan: { icon: ListChecks, label: "Plan" },
-  "tool-call": { icon: Wrench, label: "Tool call" },
-  "tool-result": { icon: Wrench, label: "Tool result" },
-  model: { icon: Brain, label: "Model" },
-  approval: { icon: UserCheck, label: "Human review" },
-  deliverable: { icon: UserCheck, label: "Deliverable" },
+const STEP_META: Record<AgentStep["kind"], { icon: typeof ListChecks }> = {
+  plan: { icon: ListChecks },
+  "tool-call": { icon: Wrench },
+  "tool-result": { icon: Wrench },
+  model: { icon: Brain },
+  approval: { icon: UserCheck },
+  deliverable: { icon: UserCheck },
 };
 
-function StepCard({ step, onApprove, onReject, approval }: {
-  step: AgentStep;
-  approval?: "none" | "pending" | "approved" | "rejected";
-  onApprove?: () => void;
-  onReject?: () => void;
-}) {
-  const meta = STEP_META[step.kind];
-  const Icon = meta.icon;
+function StepRow({ step }: { step: AgentStep }) {
+  const Icon = STEP_META[step.kind].icon;
   const model = step.modelId ? MODELS.find((m) => m.id === step.modelId) : undefined;
-  const isApproval = step.kind === "approval";
 
   return (
-    <div className="flex gap-3 animate-fade-in">
-      <div className="flex flex-col items-center">
-        <span
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border"
-          style={{
-            borderColor: isApproval ? "var(--copper-500)" : "var(--border-default)",
-            background: isApproval ? "var(--copper-100)" : "var(--bg-surface)",
-            color: isApproval ? "var(--copper-700)" : "var(--text-secondary)",
-          }}
-        >
-          <Icon size={12} />
-        </span>
-        <span className="mt-1 w-px flex-1" style={{ background: "var(--border-subtle)" }} />
-      </div>
-
-      <div className="min-w-0 flex-1 pb-4">
+    <div className="flex gap-3 py-2.5 animate-fade-in">
+      <span
+        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+        style={{ background: "var(--bg-sunken)", color: "var(--text-tertiary)" }}
+      >
+        <Icon size={11} />
+      </span>
+      <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
-            {step.title}
-          </p>
+          <p className="text-[12.5px] font-medium" style={{ color: "var(--text-primary)" }}>{step.title}</p>
           {model && (
-            <span
-              className="rounded-full border px-2 py-0.5 text-[10.5px] font-medium"
-              style={{ borderColor: "var(--border-default)", color: "var(--text-tertiary)" }}
-            >
-              {model.name}
-            </span>
-          )}
-          {step.durationMs && (
-            <span className="mono text-[10.5px]" style={{ color: "var(--text-tertiary)" }}>
-              {(step.durationMs / 1000).toFixed(2)}s
-            </span>
+            <span className="text-[10.5px]" style={{ color: "var(--text-tertiary)" }}>{model.name}</span>
           )}
         </div>
-
         {step.detail && (
-          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            {step.detail}
-          </p>
+          <p className="mt-0.5 text-[12.5px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>{step.detail}</p>
         )}
-
+        {step.showScan && <ScanPreview label="Scanned original" align="left" />}
         {step.code && (
-          <div className="mt-2">
-            <CodeBlock code={step.code} lang={step.codeLang ?? "python"} compact />
-          </div>
+          <div className="mt-2"><CodeBlock code={step.code} lang={step.codeLang ?? "python"} compact /></div>
         )}
-
         {step.output && (
           <pre
-            className="mono mt-2 whitespace-pre-wrap rounded-md border px-3 py-2 text-[12px] leading-relaxed"
-            style={{ background: "var(--bg-sunken)", borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
+            className="mono mt-2 whitespace-pre-wrap rounded-md border px-3 py-2 text-[11.5px] leading-relaxed"
+            style={{ background: "var(--bg-sunken)", borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
           >
             {step.output}
           </pre>
         )}
+        {step.citations && <CitationRow citations={step.citations} />}
+      </div>
+    </div>
+  );
+}
 
-        {step.citations && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {step.citations.map((c) => (
-              <span
-                key={c.doc + c.page}
-                className="flex items-center gap-1 rounded-full border px-2 py-1 text-[11px]"
-                style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
-              >
-                <Quote size={10} />
-                {c.doc} · p.{c.page}
-              </span>
-            ))}
-          </div>
-        )}
+function AgentTrail({ steps, running, meta }: { steps: AgentStep[]; running: boolean; meta: string }) {
+  const [open, setOpen] = useState(running);
+  const wasRunning = useRef(running);
 
-        {isApproval && approval === "pending" && (
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              onClick={onApprove}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors"
-              style={{ background: "var(--safe-600)" }}
-            >
-              <CheckCircle2 size={13} />
-              Approve and export
-            </button>
-            <button
-              onClick={onReject}
-              className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[12.5px] font-medium transition-colors"
-              style={{ borderColor: "var(--border-default)", color: "var(--alert-600)" }}
-            >
-              <XCircle size={13} />
-              Reject, send back
-            </button>
-          </div>
-        )}
-        {isApproval && approval === "approved" && (
-          <p className="mt-2 flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: "var(--safe-600)" }}>
-            <CheckCircle2 size={13} /> Approved by you, deliverable exported and logged
-          </p>
-        )}
-        {isApproval && approval === "rejected" && (
-          <p className="mt-2 flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: "var(--alert-600)" }}>
-            <XCircle size={13} /> Rejected. Returned to the agent queue for revision
-          </p>
-        )}
+  useEffect(() => {
+    if (wasRunning.current && !running) {
+      const t = setTimeout(() => setOpen(false), 900);
+      wasRunning.current = running;
+      return () => clearTimeout(t);
+    }
+    wasRunning.current = running;
+  }, [running]);
+
+  if (steps.length === 0) return null;
+
+  return (
+    <div className="mb-3 rounded-lg border" style={{ borderColor: "var(--border-subtle)" }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors"
+      >
+        <ChevronRight
+          size={13}
+          className="shrink-0 transition-transform"
+          style={{ color: "var(--text-tertiary)", transform: open ? "rotate(90deg)" : "none" }}
+        />
+        <span className="text-[12px] font-medium" style={{ color: "var(--text-secondary)" }}>
+          {running ? "Working" : "Agent steps"}
+        </span>
+        <span className="text-[11.5px]" style={{ color: "var(--text-tertiary)" }}>{meta}</span>
+        {running && <span className="caret text-[12px]" style={{ color: "var(--text-tertiary)" }}>▍</span>}
+      </button>
+      {open && (
+        <div className="divide-y px-3 pb-2" style={{ borderColor: "var(--border-subtle)" }}>
+          {steps.map((step) => (
+            <StepRow key={step.id} step={step} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ApprovalBar({ approval, detail, onApprove, onReject }: {
+  approval: "pending" | "approved" | "rejected";
+  detail?: string;
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  if (approval === "approved") {
+    return (
+      <p className="mb-3 flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: "var(--safe-600)" }}>
+        <CheckCircle2 size={14} /> Approved and exported
+      </p>
+    );
+  }
+  if (approval === "rejected") {
+    return (
+      <p className="mb-3 flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: "var(--alert-600)" }}>
+        <XCircle size={14} /> Rejected, sent back to the agent
+      </p>
+    );
+  }
+  return (
+    <div
+      className="mb-3 rounded-lg border p-3.5"
+      style={{ borderColor: "var(--copper-300)", background: "var(--copper-100)" }}
+    >
+      <p className="flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: "var(--copper-700)" }}>
+        <UserCheck size={14} />
+        Needs your review before it can be exported
+      </p>
+      {detail && (
+        <p className="mt-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>{detail}</p>
+      )}
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={onApprove}
+          className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors"
+          style={{ background: "var(--safe-600)" }}
+        >
+          <CheckCircle2 size={13} />
+          Approve and export
+        </button>
+        <button
+          onClick={onReject}
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[12.5px] font-medium transition-colors"
+          style={{ borderColor: "var(--border-default)", color: "var(--alert-600)" }}
+        >
+          <XCircle size={13} />
+          Reject, send back
+        </button>
       </div>
     </div>
   );
 }
 
 function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () => void; onReject: () => void }) {
-  const { user } = useAuth();
   const { scenario, revealCount, approval } = turn;
   const visibleSteps = scenario.steps.slice(0, revealCount);
   const allRevealed = revealCount >= scenario.steps.length;
+  const running = !allRevealed;
+
+  const approvalStep = visibleSteps.find((s) => s.kind === "approval");
+  const trailSteps = visibleSteps.filter((s) => s.kind !== "approval");
+  const lastModelStep = [...visibleSteps].reverse().find((s) => s.kind === "model");
+  const allCitations = visibleSteps.flatMap((s) => s.citations ?? []);
+
+  const modelUsed = MODELS.find((m) => m.id === scenario.routedModelId);
+  const trailMeta = `${trailSteps.length} steps · ${modelUsed?.name ?? ""}`;
+
   const showDeliverable = scenario.deliverable && allRevealed && approval !== "rejected";
+  const showAnswer = !scenario.deliverable && allRevealed && lastModelStep?.detail;
   const locked = approval === "pending";
 
   return (
-    <div className="flex flex-col gap-4 border-b py-6 first:pt-0" style={{ borderColor: "var(--border-subtle)" }}>
-      <div className="flex items-start gap-3">
-        <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-          style={{ background: "var(--brand-700)" }}
+    <div id={turn.id} className="flex scroll-mt-4 flex-col gap-5 border-b py-7 first:pt-0" style={{ borderColor: "var(--border-subtle)" }}>
+      <div className="flex flex-col items-end">
+        <span className="mb-1 text-[11px]" style={{ color: "var(--text-tertiary)" }}>{turn.time}</span>
+        <div
+          className="max-w-[75%] rounded-2xl rounded-tr-sm px-4 py-2.5"
+          style={{ background: "var(--bg-sunken)" }}
         >
-          {user?.initials}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[12.5px] font-medium" style={{ color: "var(--text-primary)" }}>{user?.name}</span>
-            <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>{turn.time}</span>
-          </div>
-          <p className="mt-1 text-[14px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+          <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
             {scenario.prompt}
           </p>
-          {scenario.attachedFiles.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {scenario.attachedFiles.map((fid) => {
-                const doc = KB_DOCS.find((d) => d.id === fid);
-                if (!doc) return null;
-                return (
-                  <span
-                    key={fid}
-                    className="flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px]"
-                    style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
-                  >
-                    <Paperclip size={10} />
-                    {doc.name}
-                  </span>
-                );
-              })}
-            </div>
-          )}
         </div>
+        {scenario.attachedFiles.length > 0 && (
+          <div className="mt-2 flex max-w-[75%] flex-wrap justify-end gap-1.5">
+            {scenario.attachedFiles.map((fid) => {
+              const doc = KB_DOCS.find((d) => d.id === fid);
+              if (!doc) return null;
+              return (
+                <span
+                  key={fid}
+                  className="flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px]"
+                  style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
+                >
+                  <Paperclip size={10} />
+                  {doc.name}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <div className="flex items-start gap-3 pl-10">
-        <div className="min-w-0 flex-1">
-          <span
-            className="mb-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
-            style={{ background: "var(--accent-soft)", color: "var(--accent-strong)" }}
-          >
-            {scenario.categoryLabel}
-          </span>
+      <div className="flex min-w-0 flex-col">
+        <div className="mb-2 flex items-center gap-2">
+          <RakshakaMark size={16} />
+          <span className="text-[12.5px] font-medium" style={{ color: "var(--text-primary)" }}>Rakshaka</span>
+        </div>
 
-          <div className="flex flex-col">
-            {visibleSteps.map((step) => (
-              <StepCard
-                key={step.id}
-                step={step}
-                approval={step.kind === "approval" ? approval : undefined}
-                onApprove={onApprove}
-                onReject={onReject}
-              />
-            ))}
-            {!allRevealed && (
-              <div className="flex items-center gap-2 py-1 text-[12.5px]" style={{ color: "var(--text-tertiary)" }}>
-                <span className="mono">Agent working</span>
-                <span className="caret">▍</span>
-              </div>
-            )}
-          </div>
+        <div className="pl-[26px]">
+          <AgentTrail steps={trailSteps} running={running} meta={trailMeta} />
+
+          {approvalStep && (
+            <ApprovalBar
+              approval={approval === "none" ? "pending" : approval}
+              detail={approvalStep.detail}
+              onApprove={onApprove}
+              onReject={onReject}
+            />
+          )}
+
+          {showAnswer && (
+            <div>
+              <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+                {lastModelStep!.detail}
+              </p>
+              {allCitations.length > 0 && <CitationRow citations={allCitations} />}
+            </div>
+          )}
 
           {showDeliverable && scenario.deliverable && (
-            <div className="mt-1">
-              <DeliverableCard deliverable={scenario.deliverable} locked={locked} />
+            <div className="flex flex-col gap-2.5">
+              <DeliverableCard deliverable={scenario.deliverable} locked={locked} citations={allCitations} />
+              {scenario.extraDeliverable && (
+                <DeliverableCard deliverable={scenario.extraDeliverable} locked={locked} />
+              )}
             </div>
           )}
         </div>
@@ -392,7 +420,7 @@ export function ChatPanel({
               onClick={() => submit(value)}
               disabled={!value.trim()}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-white transition-colors disabled:opacity-40"
-              style={{ background: "var(--accent-strong)" }}
+              style={{ background: "var(--accent-solid)" }}
             >
               <Send size={14} />
             </button>

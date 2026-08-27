@@ -1,7 +1,9 @@
-import { FileText, FileSpreadsheet, Presentation, Code2, Download, Eye } from "lucide-react";
+import { FileText, FileSpreadsheet, Presentation, Code2, Download, Eye, Loader2 } from "lucide-react";
 import { useState } from "react";
-import type { Deliverable } from "../../lib/types";
+import type { Citation, Deliverable } from "../../lib/types";
 import { CodeBlock } from "../common/CodeBlock";
+import { CitationRow } from "../common/CitationRow";
+import { exportDeliverable } from "../../lib/exportFile";
 
 const ICONS: Record<Deliverable["type"], typeof FileText> = {
   docx: FileText,
@@ -17,10 +19,28 @@ const COLORS: Record<Deliverable["type"], string> = {
   code: "var(--accent)",
 };
 
-export function DeliverableCard({ deliverable, locked }: { deliverable: Deliverable; locked: boolean }) {
+export function DeliverableCard({
+  deliverable,
+  locked,
+  citations = [],
+}: {
+  deliverable: Deliverable;
+  locked: boolean;
+  citations?: Citation[];
+}) {
   const [open, setOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const Icon = ICONS[deliverable.type];
   const color = COLORS[deliverable.type];
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportDeliverable(deliverable);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div
@@ -54,16 +74,23 @@ export function DeliverableCard({ deliverable, locked }: { deliverable: Delivera
             {open ? "Hide preview" : "Preview"}
           </button>
           <button
-            disabled={locked}
-            title={locked ? "Awaiting approval before export" : "Export to local downloads"}
+            onClick={handleExport}
+            disabled={locked || exporting}
+            title={locked ? "Awaiting approval before export" : `Download as .${deliverable.name.split(".").pop()}`}
             className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-45"
-            style={{ background: "var(--accent-strong)" }}
+            style={{ background: "var(--accent-solid)" }}
           >
-            <Download size={13} />
-            Export
+            {exporting ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+            {exporting ? "Preparing" : "Export"}
           </button>
         </div>
       </div>
+
+      {citations.length > 0 && (
+        <div className="px-4 pb-3">
+          <CitationRow citations={citations} />
+        </div>
+      )}
 
       {open && (
         <div className="border-t px-4 py-3.5" style={{ borderColor: "var(--border-subtle)" }}>
@@ -82,6 +109,31 @@ export function DeliverableCard({ deliverable, locked }: { deliverable: Delivera
             </div>
           )}
           {deliverable.code && <CodeBlock code={deliverable.code} lang={deliverable.codeLang ?? "python"} />}
+          {deliverable.rows && (
+            <div className="overflow-x-auto rounded-md border" style={{ borderColor: "var(--border-subtle)" }}>
+              <table className="w-full border-collapse text-[12px]">
+                <tbody>
+                  {deliverable.rows.map((row, i) => (
+                    <tr key={i} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)" }}>
+                      {row.map((cell, j) => (
+                        <td
+                          key={j}
+                          className="whitespace-nowrap px-3 py-1.5"
+                          style={{
+                            color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
+                            fontWeight: i === 0 ? 600 : 400,
+                            background: i === 0 ? "var(--bg-sunken)" : "transparent",
+                          }}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

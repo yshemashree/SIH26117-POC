@@ -1,28 +1,9 @@
 import { useState } from "react";
-import { FileText, FileImage, FileSpreadsheet, ScanLine, List, GitBranch, Lock, Download } from "lucide-react";
+import { List, GitBranch, Lock, Download } from "lucide-react";
 import { KB_DOCS } from "../../lib/data";
+import { SAMPLE_FILE, KIND_ICON, CLASS_STYLE } from "../../lib/kbStyle";
+import { ScanPreview } from "../common/ScanPreview";
 import type { KbDoc } from "../../lib/types";
-
-const SAMPLE_FILE: Record<string, string> = {
-  "sop-09": "/sample-files/SOP-09_Tank_Inspection_Thickness_Limits.txt",
-  "sop-14": "/sample-files/SOP-14_Confined_Space_Entry.txt",
-  "insp-tk204": "/sample-files/INSP-2026-0417_TK-204_Scanned_Report_OCR.txt",
-  "hse-q2": "/sample-files/HSE_Incident_Log_Q2.csv",
-};
-
-const KIND_ICON: Record<KbDoc["kind"], typeof FileText> = {
-  pdf: FileText,
-  "pdf-scanned": ScanLine,
-  image: FileImage,
-  xlsx: FileSpreadsheet,
-  docx: FileText,
-};
-
-const CLASS_STYLE: Record<KbDoc["classification"], { bg: string; fg: string }> = {
-  Internal: { bg: "var(--bg-sunken)", fg: "var(--text-secondary)" },
-  Confidential: { bg: "var(--amber-100)", fg: "var(--amber-600)" },
-  Restricted: { bg: "var(--alert-100)", fg: "var(--alert-600)" },
-};
 
 const FOLDERS = Array.from(new Set(KB_DOCS.map((d) => d.folder)));
 
@@ -152,7 +133,16 @@ export function KnowledgeBase() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-8">
-        <div className="mx-auto max-w-xl">
+        <div className="mx-auto flex max-w-2xl gap-8">
+          {(selected.kind === "pdf-scanned" || selected.kind === "image") && (
+            <div className="w-44 shrink-0">
+              <ScanPreview label={selected.kind === "pdf-scanned" ? `Page 1 of ${selected.pages ?? 1}` : "Drawing"} />
+              <p className="mt-1 text-center text-[10.5px]" style={{ color: "var(--text-tertiary)" }}>
+                Rendered on device, never uploaded
+              </p>
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span
               className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
@@ -206,6 +196,7 @@ export function KnowledgeBase() {
               document is scoped to your role and department, and every query against it is written to
               the audit trail.
             </p>
+          </div>
           </div>
         </div>
       </div>

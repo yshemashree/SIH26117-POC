@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TopBar, Sidebar } from "../components/layout/AppShell";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { RightRail } from "../components/rail/RightRail";
 import { KnowledgeBase } from "../components/knowledge/KnowledgeBase";
 import { Sandbox } from "../components/sandbox/Sandbox";
+import { LiveLogs } from "../components/livelogs/LiveLogs";
+import { ModelRouting } from "../components/routing/ModelRouting";
+import { Vault } from "../components/vault/Vault";
 import { SCENARIOS } from "../lib/data";
 import { buildGenericScenario } from "../lib/generic";
+import { loadTurns, saveTurns, loadAuditLog, saveAuditLog, clearHistory } from "../lib/persist";
 import type { AuditEntry, Scenario, Section, Turn } from "../lib/types";
 
 function nowLabel() {
@@ -14,8 +18,33 @@ function nowLabel() {
 
 export default function Workbench() {
   const [section, setSection] = useState<Section>("chat");
-  const [turns, setTurns] = useState<Turn[]>([]);
-  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [turns, setTurns] = useState<Turn[]>(loadTurns);
+  const [auditLog, setAuditLog] = useState<AuditEntry[]>(loadAuditLog);
+  const [pendingScroll, setPendingScroll] = useState<string | null>(null);
+
+  useEffect(() => saveTurns(turns), [turns]);
+  useEffect(() => saveAuditLog(auditLog), [auditLog]);
+
+  useEffect(() => {
+    if (section !== "chat" || !pendingScroll) return;
+    const target = pendingScroll;
+    const raf = requestAnimationFrame(() => {
+      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setPendingScroll(null);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [section, pendingScroll]);
+
+  const selectTurn = (turnId: string) => {
+    setSection("chat");
+    setPendingScroll(turnId);
+  };
+
+  const newSession = () => {
+    clearHistory();
+    setTurns([]);
+    setAuditLog([]);
+  };
 
   const runTurn = (scenario: Scenario) => {
     const id = `${scenario.id}-${Date.now()}`;
@@ -82,7 +111,7 @@ export default function Workbench() {
     <div className="flex h-screen flex-col" style={{ background: "var(--bg-canvas)" }}>
       <TopBar />
       <div className="flex min-h-0 flex-1">
-        <Sidebar section={section} onSection={setSection} turns={turns} />
+        <Sidebar section={section} onSection={setSection} turns={turns} onSelectTurn={selectTurn} onNewSession={newSession} />
 
         {section === "chat" && (
           <>
@@ -90,7 +119,10 @@ export default function Workbench() {
             <RightRail auditLog={auditLog} activeTurn={activeTurn} />
           </>
         )}
+        {section === "logs" && <LiveLogs turns={turns} auditLog={auditLog} />}
+        {section === "routing" && <ModelRouting turns={turns} auditLog={auditLog} />}
         {section === "knowledge" && <KnowledgeBase />}
+        {section === "vault" && <Vault turns={turns} />}
         {section === "sandbox" && <Sandbox />}
       </div>
     </div>

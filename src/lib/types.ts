@@ -10,6 +10,8 @@ export interface LocalModel {
   id: string;
   name: string;
   family: string;
+  version: string;
+  license: string;
   params: string;
   quantization: string;
   contextWindow: string;
@@ -46,6 +48,11 @@ export type StepKind =
   | "approval"
   | "deliverable";
 
+export interface Citation {
+  doc: string;
+  page: string;
+}
+
 export interface AgentStep {
   id: string;
   kind: StepKind;
@@ -56,9 +63,10 @@ export interface AgentStep {
   code?: string;
   codeLang?: string;
   output?: string;
-  citations?: { doc: string; page: string }[];
+  citations?: Citation[];
   status?: "done" | "running" | "pending" | "blocked";
   durationMs?: number;
+  showScan?: boolean;
 }
 
 export interface Deliverable {
@@ -71,7 +79,7 @@ export interface Deliverable {
   codeLang?: string;
 }
 
-export type Section = "chat" | "knowledge" | "sandbox";
+export type Section = "chat" | "logs" | "routing" | "knowledge" | "sandbox" | "vault";
 
 export type ApprovalState = "none" | "pending" | "approved" | "rejected";
 
@@ -102,5 +110,6 @@ export interface Scenario {
   attachedFiles: string[];
   steps: AgentStep[];
   deliverable?: Deliverable;
+  extraDeliverable?: Deliverable;
   audit: AuditEntry[];
 }

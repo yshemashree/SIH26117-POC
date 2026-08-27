@@ -6,18 +6,26 @@
 }
 
 :root {
-  /* ONGC / MRPL institutional forest green */
-  --brand-950: #101c14;
-  --brand-900: #1a2e1e;
-  --brand-800: #22402a;
-  --brand-700: #2c5234;
-  --brand-600: #386640;
-  --brand-500: #457d4c;
-  --brand-400: #6b9868;
-  --brand-300: #9cbd94;
-  --brand-200: #c8dcc0;
-  --brand-100: #e6efdf;
-  --brand-50: #f3f7ee;
+  /* MRPL institutional green, anchored on #5B7E3C sampled off mrpl.co.in */
+  --brand-950: #1a2311;
+  --brand-900: #233017;
+  --brand-800: #324521;
+  --brand-700: #5b7e3c;
+  --brand-600: #7c9863;
+  --brand-500: #99af86;
+  --brand-400: #bac9ad;
+  --brand-300: #d4decc;
+  --brand-200: #e8ede4;
+  --brand-100: #f5f7f3;
+  --brand-50: #fafbf9;
+
+  /* Stays constant across themes: the one MRPL green every solid button uses */
+  --accent-solid: var(--brand-700);
+
+  /* Olive highlight, sampled off mrpl.co.in alongside the brand green */
+  --olive-600: #626719;
+  --olive-500: #838921;
+  --olive-100: #f3f3e9;
 
   /* Refinery amber, echoes the site's award and callout banners */
   --copper-700: #96501c;
