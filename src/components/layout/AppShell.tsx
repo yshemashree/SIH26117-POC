@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   MessageSquare,
+  LayoutDashboard,
   Library,
   TerminalSquare,
   Sun,
@@ -18,6 +19,7 @@ import type { Section, Turn } from "../../lib/types";
 
 const NAV: { id: Section; label: string; icon: typeof MessageSquare }[] = [
   { id: "chat", label: "Agent Chat", icon: MessageSquare },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "knowledge", label: "Knowledge Base", icon: Library },
   { id: "sandbox", label: "Sandbox", icon: TerminalSquare },
 ];

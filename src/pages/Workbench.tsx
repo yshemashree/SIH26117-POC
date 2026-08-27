@@ -4,6 +4,7 @@ import { ChatPanel } from "../components/chat/ChatPanel";
 import { RightRail } from "../components/rail/RightRail";
 import { KnowledgeBase } from "../components/knowledge/KnowledgeBase";
 import { Sandbox } from "../components/sandbox/Sandbox";
+import { Dashboard } from "../components/dashboard/Dashboard";
 import { SCENARIOS } from "../lib/data";
 import { buildGenericScenario } from "../lib/generic";
 import type { AuditEntry, Scenario, Section, Turn } from "../lib/types";
@@ -90,6 +91,7 @@ export default function Workbench() {
             <RightRail auditLog={auditLog} activeTurn={activeTurn} />
           </>
         )}
+        {section === "dashboard" && <Dashboard turns={turns} auditLog={auditLog} />}
         {section === "knowledge" && <KnowledgeBase />}
         {section === "sandbox" && <Sandbox />}
       </div>

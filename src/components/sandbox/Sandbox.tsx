@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Play, FileCode2, WifiOff, Box, Loader2, CheckCircle2 } from "lucide-react";
+import { Play, FileCode2, WifiOff, Box, Loader2, CheckCircle2, Download } from "lucide-react";
 import { SCENARIOS } from "../../lib/data";
 import { CodeBlock } from "../common/CodeBlock";
+import { exportSourceFile } from "../../lib/exportFile";
 
 const scenario = SCENARIOS.find((s) => s.id === "flare-kod-sizing")!;
 const mainCode = scenario.steps.find((s) => s.id === "s3")!.code!;
@@ -80,6 +81,17 @@ export function Sandbox() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex-1 overflow-auto p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="mono text-[11.5px]" style={{ color: "var(--text-tertiary)" }}>{FILES[active].name}</span>
+              <button
+                onClick={() => exportSourceFile(FILES[active].name, FILES[active].code)}
+                className="flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors"
+                style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
+              >
+                <Download size={11} />
+                Download
+              </button>
+            </div>
             <CodeBlock code={FILES[active].code} lang="python" />
           </div>
 
