@@ -172,6 +172,7 @@ function ModelsTab({ activeTurn }: { activeTurn?: Turn }) {
                 <span>{m.vram} VRAM</span>
                 <span>{m.latencyMs}ms p50</span>
               </div>
+              <p className="mt-1.5 text-[10px]" style={{ color: "var(--olive-600)" }}>Open weight · {m.license}</p>
             </li>
           );
         })}

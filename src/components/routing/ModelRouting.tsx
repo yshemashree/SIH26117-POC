@@ -48,7 +48,7 @@ export function ModelRouting({ turns, auditLog }: { turns: Turn[]; auditLog: Aud
             Model routing
           </h1>
           <p className="mt-1 text-[13px]" style={{ color: "var(--text-secondary)" }}>
-            How the last request moved through classification to a model, and every model available to route to.
+            How the last request moved through classification to a model, and every open-weight model available to route to.
           </p>
         </div>
 
@@ -135,6 +135,12 @@ export function ModelRouting({ turns, auditLog }: { turns: Turn[]; auditLog: Aud
                   </span>
                 </div>
                 <p className="text-[10.5px]" style={{ color: "var(--text-tertiary)" }}>{m.family} · {m.version}</p>
+                <span
+                  className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-semibold"
+                  style={{ background: "var(--olive-100)", color: "var(--olive-600)" }}
+                >
+                  Open weight · {m.license}
+                </span>
                 <p className="mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>{m.notes}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {m.capabilities.map((c) => (

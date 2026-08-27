@@ -11,6 +11,7 @@ export interface LocalModel {
   name: string;
   family: string;
   version: string;
+  license: string;
   params: string;
   quantization: string;
   contextWindow: string;
