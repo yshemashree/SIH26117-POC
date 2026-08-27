@@ -4,7 +4,8 @@ import { ChatPanel } from "../components/chat/ChatPanel";
 import { RightRail } from "../components/rail/RightRail";
 import { KnowledgeBase } from "../components/knowledge/KnowledgeBase";
 import { Sandbox } from "../components/sandbox/Sandbox";
-import { Dashboard } from "../components/dashboard/Dashboard";
+import { LiveLogs } from "../components/livelogs/LiveLogs";
+import { ModelRouting } from "../components/routing/ModelRouting";
 import { Vault } from "../components/vault/Vault";
 import { SCENARIOS } from "../lib/data";
 import { buildGenericScenario } from "../lib/generic";
@@ -118,7 +119,8 @@ export default function Workbench() {
             <RightRail auditLog={auditLog} activeTurn={activeTurn} />
           </>
         )}
-        {section === "dashboard" && <Dashboard turns={turns} auditLog={auditLog} />}
+        {section === "logs" && <LiveLogs turns={turns} auditLog={auditLog} />}
+        {section === "routing" && <ModelRouting turns={turns} auditLog={auditLog} />}
         {section === "knowledge" && <KnowledgeBase />}
         {section === "vault" && <Vault turns={turns} />}
         {section === "sandbox" && <Sandbox />}

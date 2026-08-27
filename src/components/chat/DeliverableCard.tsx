@@ -109,6 +109,31 @@ export function DeliverableCard({
             </div>
           )}
           {deliverable.code && <CodeBlock code={deliverable.code} lang={deliverable.codeLang ?? "python"} />}
+          {deliverable.rows && (
+            <div className="overflow-x-auto rounded-md border" style={{ borderColor: "var(--border-subtle)" }}>
+              <table className="w-full border-collapse text-[12px]">
+                <tbody>
+                  {deliverable.rows.map((row, i) => (
+                    <tr key={i} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)" }}>
+                      {row.map((cell, j) => (
+                        <td
+                          key={j}
+                          className="whitespace-nowrap px-3 py-1.5"
+                          style={{
+                            color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
+                            fontWeight: i === 0 ? 600 : 400,
+                            background: i === 0 ? "var(--bg-sunken)" : "transparent",
+                          }}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

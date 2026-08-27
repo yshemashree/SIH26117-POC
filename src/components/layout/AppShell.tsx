@@ -1,7 +1,8 @@
 import { useState } from "react";
 import {
   MessageSquare,
-  LayoutDashboard,
+  ScrollText,
+  Route,
   Library,
   TerminalSquare,
   Archive,
@@ -23,7 +24,8 @@ import type { Section, Turn } from "../../lib/types";
 
 const NAV: { id: Section; label: string; icon: typeof MessageSquare }[] = [
   { id: "chat", label: "Agent Chat", icon: MessageSquare },
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "logs", label: "Live Logs", icon: ScrollText },
+  { id: "routing", label: "Model Routing", icon: Route },
   { id: "knowledge", label: "Knowledge Base", icon: Library },
   { id: "vault", label: "Vault", icon: Archive },
   { id: "sandbox", label: "Sandbox", icon: TerminalSquare },

@@ -62,6 +62,24 @@ async function exportPptx(deliverable: Deliverable) {
   await pptx.writeFile({ fileName: deliverable.name });
 }
 
+async function exportXlsx(deliverable: Deliverable) {
+  const { default: ExcelJS } = await import("exceljs");
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Summary");
+  for (const row of deliverable.rows ?? []) {
+    sheet.addRow(row);
+  }
+  sheet.getRow(1).font = { bold: true };
+  sheet.columns.forEach((col) => {
+    col.width = 26;
+  });
+  const buffer = await workbook.xlsx.writeBuffer();
+  downloadBlob(
+    new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    deliverable.name
+  );
+}
+
 function exportCode(deliverable: Deliverable) {
   downloadText(deliverable.code ?? "", deliverable.name);
 }
@@ -69,6 +87,7 @@ function exportCode(deliverable: Deliverable) {
 export async function exportDeliverable(deliverable: Deliverable) {
   if (deliverable.type === "docx") return exportDocx(deliverable);
   if (deliverable.type === "pptx") return exportPptx(deliverable);
+  if (deliverable.type === "xlsx") return exportXlsx(deliverable);
   return exportCode(deliverable);
 }
 

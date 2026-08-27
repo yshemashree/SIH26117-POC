@@ -16,6 +16,7 @@ import type { AgentStep, Turn } from "../../lib/types";
 import { SCENARIOS, MODELS, KB_DOCS } from "../../lib/data";
 import { CodeBlock } from "../common/CodeBlock";
 import { CitationRow } from "../common/CitationRow";
+import { ScanPreview } from "../common/ScanPreview";
 import { DeliverableCard } from "./DeliverableCard";
 import { RakshakaMark } from "../common/Logo";
 
@@ -55,6 +56,7 @@ function StepRow({ step }: { step: AgentStep }) {
         {step.detail && (
           <p className="mt-0.5 text-[12.5px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>{step.detail}</p>
         )}
+        {step.showScan && <ScanPreview label="Scanned original" align="left" />}
         {step.code && (
           <div className="mt-2"><CodeBlock code={step.code} lang={step.codeLang ?? "python"} compact /></div>
         )}
@@ -247,8 +249,11 @@ function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () =>
           )}
 
           {showDeliverable && scenario.deliverable && (
-            <div>
+            <div className="flex flex-col gap-2.5">
               <DeliverableCard deliverable={scenario.deliverable} locked={locked} citations={allCitations} />
+              {scenario.extraDeliverable && (
+                <DeliverableCard deliverable={scenario.extraDeliverable} locked={locked} />
+              )}
             </div>
           )}
         </div>

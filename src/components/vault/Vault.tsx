@@ -6,6 +6,7 @@ import { DeliverableCard } from "../chat/DeliverableCard";
 
 export function Vault({ turns }: { turns: Turn[] }) {
   const deliverables = [...turns].reverse().filter((t) => t.scenario.deliverable && t.approval !== "rejected");
+  const deliverableCount = deliverables.reduce((n, t) => n + 1 + (t.scenario.extraDeliverable ? 1 : 0), 0);
 
   const usedDocIds = Array.from(new Set(turns.flatMap((t) => t.scenario.attachedFiles)));
   const usedDocs = usedDocIds.map((id) => KB_DOCS.find((d) => d.id === id)).filter((d): d is (typeof KB_DOCS)[number] => !!d);
@@ -23,7 +24,7 @@ export function Vault({ turns }: { turns: Turn[] }) {
         </div>
 
         <p className="mb-3 text-[11.5px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-          Deliverables · {deliverables.length}
+          Deliverables · {deliverableCount}
         </p>
         {deliverables.length === 0 ? (
           <p
@@ -35,8 +36,8 @@ export function Vault({ turns }: { turns: Turn[] }) {
         ) : (
           <div className="flex flex-col gap-3">
             {deliverables.map((t) => (
-              <div key={t.id}>
-                <p className="mb-1.5 truncate text-[11.5px]" style={{ color: "var(--text-tertiary)" }}>
+              <div key={t.id} className="flex flex-col gap-2.5">
+                <p className="truncate text-[11.5px]" style={{ color: "var(--text-tertiary)" }}>
                   {t.time} · from &ldquo;{t.scenario.label}&rdquo;
                 </p>
                 <DeliverableCard
@@ -44,6 +45,9 @@ export function Vault({ turns }: { turns: Turn[] }) {
                   locked={t.approval === "pending"}
                   citations={t.scenario.steps.flatMap((s) => s.citations ?? [])}
                 />
+                {t.scenario.extraDeliverable && (
+                  <DeliverableCard deliverable={t.scenario.extraDeliverable} locked={t.approval === "pending"} />
+                )}
               </div>
             ))}
           </div>
