@@ -1,0 +1,29 @@
+SOP-09 · TANK INSPECTION THICKNESS LIMITS
+Revision C · Issued by Inspection and Reliability Engineering
+Mangalore Refinery and Petrochemicals Limited
+
+Section 4. Shell Course Retirement Criteria
+
+4.1  Scope
+This section applies to atmospheric and low pressure storage tanks under the
+scheduled external inspection program, including tanks in the crude and
+product storage terminal.
+
+4.2  Minimum retirement thickness
+For shell courses of this tank class, minimum retirement thickness is 11.0 mm.
+Any course reading below nominal by more than 1.5 mm shall trigger an
+engineering review before the next inspection cycle.
+
+4.3  Engineering review trigger
+Where a shell course reading falls below the minimum retirement thickness in
+clause 4.2, the inspecting engineer shall raise an engineering review request
+within 5 working days and shall not close the inspection record until the
+review is logged.
+
+4.4  Re-verification
+Localized findings such as pitting near weld seams shall be scheduled for
+ultrasonic re-verification within 30 days of the finding being logged.
+
+--
+This is a representative excerpt used for the Rakshaka.AI preview build. Content
+is illustrative and does not reflect an actual MRPL engineering document.

@@ -1,0 +1,20 @@
+FIELD INSPECTION RECORD (OCR extract, handwritten and stamped original)
+Tag: TK-204            Type: Atmospheric storage tank, fixed roof
+Inspector: R. Kamath    Date: 17-04-2026    Weather: Clear
+
+SHELL THICKNESS SURVEY (ultrasonic, 8 point grid per course)
+
+Course 1   nominal 12.7 mm   read 11.8 mm
+Course 2   nominal 12.7 mm   read 10.9 mm   <-- below SOP-09 minimum retirement
+Course 3   nominal 12.7 mm   read 12.1 mm
+
+Handwritten note (north face, course 2 weld seam):
+  "Localized pitting near course 2 weld seam, north face. Recommend
+   re-check at next opportunity, area photographed, ref frames 14-17."
+
+Inspector signature: R. Kamath          Countersigned: pending
+
+--
+This is a representative sample used for the Rakshaka.AI preview build to
+demonstrate on device OCR of a scanned field report. It does not reflect an
+actual MRPL inspection record.

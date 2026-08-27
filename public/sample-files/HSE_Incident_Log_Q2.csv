@@ -1,0 +1,13 @@
+date,month,category,area,severity,root_cause_theme
+2026-04-03,April,Near miss,Laydown yard,Low,Housekeeping in laydown yard
+2026-04-09,April,First aid,CDU-2,Low,PPE compliance at height work
+2026-04-17,April,Reportable,Tank farm,Medium,TK-204 shell thickness finding
+2026-04-22,April,Near miss,CDU-2,Low,Permit to work overlap during shift change
+2026-04-28,April,Reportable,Utilities,Medium,Permit to work overlap during shift change
+2026-05-05,May,Near miss,Laydown yard,Low,Housekeeping in laydown yard
+2026-05-14,May,First aid,Tank farm,Low,PPE compliance at height work
+2026-05-19,May,Reportable,CDU-2,Medium,PPE compliance at height work
+2026-05-26,May,Near miss,Utilities,Low,Housekeeping in laydown yard
+2026-06-02,June,Near miss,CDU-2,Low,PPE compliance at height work
+2026-06-11,June,First aid,Laydown yard,Low,Housekeeping in laydown yard
+2026-06-20,June,Near miss,Tank farm,Low,Permit to work overlap during shift change

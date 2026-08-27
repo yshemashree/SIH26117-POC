@@ -1,0 +1,24 @@
+SOP-14 · CONFINED SPACE ENTRY
+Revision F · Issued by HSE Department
+Mangalore Refinery and Petrochemicals Limited
+
+Section 3. Authorization
+
+3.2  Entry into any vessel, tank or pit classified as a confined space requires
+a signed Confined Space Entry Permit, countersigned by the Shift Engineer and
+the Area Safety Officer. The permit is valid for a single shift only.
+
+3.3  A standby attendant shall remain at the entry point for the full duration
+of the work and shall not leave the point unattended.
+
+Section 4. Atmospheric Monitoring
+
+4.1  Continuous gas testing for O2, LEL and H2S is mandatory for the duration
+of entry, logged at 15 minute intervals on the entry permit.
+
+4.2  Entry shall be suspended immediately if oxygen falls below 19.5 percent
+or LEL exceeds 10 percent, and the space re-tested before re-entry.
+
+--
+This is a representative excerpt used for the Rakshaka.AI preview build. Content
+is illustrative and does not reflect an actual MRPL safety document.
