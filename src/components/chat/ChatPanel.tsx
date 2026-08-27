@@ -17,7 +17,7 @@ import { SCENARIOS, MODELS, KB_DOCS } from "../../lib/data";
 import { CodeBlock } from "../common/CodeBlock";
 import { CitationRow } from "../common/CitationRow";
 import { DeliverableCard } from "./DeliverableCard";
-import { useAuth } from "../../lib/auth";
+import { RakshakaMark } from "../common/Logo";
 
 interface PendingFile {
   name: string;
@@ -170,7 +170,6 @@ function ApprovalBar({ approval, detail, onApprove, onReject }: {
 }
 
 function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () => void; onReject: () => void }) {
-  const { user } = useAuth();
   const { scenario, revealCount, approval } = turn;
   const visibleSteps = scenario.steps.slice(0, revealCount);
   const allRevealed = revealCount >= scenario.steps.length;
@@ -189,45 +188,44 @@ function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () =>
   const locked = approval === "pending";
 
   return (
-    <div id={turn.id} className="flex scroll-mt-4 flex-col gap-4 border-b py-6 first:pt-0" style={{ borderColor: "var(--border-subtle)" }}>
-      <div className="flex items-start gap-3">
-        <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-          style={{ background: "var(--brand-700)" }}
+    <div id={turn.id} className="flex scroll-mt-4 flex-col gap-5 border-b py-7 first:pt-0" style={{ borderColor: "var(--border-subtle)" }}>
+      <div className="flex flex-col items-end">
+        <span className="mb-1 text-[11px]" style={{ color: "var(--text-tertiary)" }}>{turn.time}</span>
+        <div
+          className="max-w-[75%] rounded-2xl rounded-tr-sm px-4 py-2.5"
+          style={{ background: "var(--bg-sunken)" }}
         >
-          {user?.initials}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[12.5px] font-medium" style={{ color: "var(--text-primary)" }}>{user?.name}</span>
-            <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>{turn.time}</span>
-          </div>
-          <p className="mt-1 text-[14px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+          <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
             {scenario.prompt}
           </p>
-          {scenario.attachedFiles.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {scenario.attachedFiles.map((fid) => {
-                const doc = KB_DOCS.find((d) => d.id === fid);
-                if (!doc) return null;
-                return (
-                  <span
-                    key={fid}
-                    className="flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px]"
-                    style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
-                  >
-                    <Paperclip size={10} />
-                    {doc.name}
-                  </span>
-                );
-              })}
-            </div>
-          )}
         </div>
+        {scenario.attachedFiles.length > 0 && (
+          <div className="mt-2 flex max-w-[75%] flex-wrap justify-end gap-1.5">
+            {scenario.attachedFiles.map((fid) => {
+              const doc = KB_DOCS.find((d) => d.id === fid);
+              if (!doc) return null;
+              return (
+                <span
+                  key={fid}
+                  className="flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px]"
+                  style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
+                >
+                  <Paperclip size={10} />
+                  {doc.name}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <div className="flex items-start gap-3 pl-10">
-        <div className="min-w-0 flex-1">
+      <div className="flex min-w-0 flex-col">
+        <div className="mb-2 flex items-center gap-2">
+          <RakshakaMark size={16} />
+          <span className="text-[12.5px] font-medium" style={{ color: "var(--text-primary)" }}>Rakshaka</span>
+        </div>
+
+        <div className="pl-[26px]">
           <AgentTrail steps={trailSteps} running={running} meta={trailMeta} />
 
           {approvalStep && (
@@ -240,11 +238,8 @@ function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () =>
           )}
 
           {showAnswer && (
-            <div
-              className="rounded-lg border p-4"
-              style={{ borderColor: "var(--border-subtle)", background: "var(--bg-surface)" }}
-            >
-              <p className="text-[13.5px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
+            <div>
+              <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
                 {lastModelStep!.detail}
               </p>
               {allCitations.length > 0 && <CitationRow citations={allCitations} />}

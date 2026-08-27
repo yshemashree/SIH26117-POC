@@ -1,4 +1,4 @@
-import { Cpu, Route, Server, Gauge } from "lucide-react";
+import { Cpu, Route, Package, Gauge, Server } from "lucide-react";
 import { MODELS } from "../../lib/data";
 import type { AuditEntry, Capability, Turn } from "../../lib/types";
 
@@ -44,10 +44,11 @@ export function Dashboard({ turns, auditLog }: { turns: Turn[]; auditLog: AuditE
   const avgLatency = Math.round(PRIMARY_MODELS.reduce((s, m) => s + m.latencyMs, 0) / PRIMARY_MODELS.length);
   const recentActivity = auditLog.filter((e) => e.category === "routing" || e.category === "approval").slice(-6).reverse();
   const routedModel = activeTurn ? MODELS.find((m) => m.id === activeTurn.scenario.routedModelId) : undefined;
+  const deliverableCount = turns.filter((t) => t.scenario.deliverable && t.approval !== "rejected").length;
 
   return (
     <div className="flex-1 overflow-y-auto p-8">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-6">
           <h1 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
             Model routing
@@ -57,10 +58,11 @@ export function Dashboard({ turns, auditLog }: { turns: Turn[]; auditLog: AuditE
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <StatTile icon={Cpu} value={`${healthy}/${PRIMARY_MODELS.length}`} label="Models online" />
           <StatTile icon={Route} value={String(turns.length)} label="Tasks this session" />
           <StatTile icon={Gauge} value={`${avgLatency}ms`} label="Avg response start" />
+          <StatTile icon={Package} value={String(deliverableCount)} label="Deliverables" />
           <StatTile icon={Server} value="1" label="GPU session" />
         </div>
 
@@ -69,7 +71,7 @@ export function Dashboard({ turns, auditLog }: { turns: Turn[]; auditLog: AuditE
           style={{ borderColor: "var(--border-subtle)", background: "var(--bg-surface)" }}
         >
           <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300"
             style={{ background: activeTurn ? "var(--safe-100)" : "var(--bg-sunken)", color: activeTurn ? "var(--safe-600)" : "var(--text-tertiary)" }}
           >
             <Route size={16} />
@@ -89,13 +91,13 @@ export function Dashboard({ turns, auditLog }: { turns: Turn[]; auditLog: AuditE
         <p className="mb-3 mt-8 text-[11.5px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
           Models available
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {PRIMARY_MODELS.map((m) => {
             const active = m.id === activeTurn?.scenario.routedModelId;
             return (
               <div
                 key={m.id}
-                className="rounded-lg border p-4"
+                className="rounded-lg border p-4 transition-colors duration-300"
                 style={{
                   borderColor: active ? "var(--accent-strong)" : "var(--border-subtle)",
                   background: active ? "var(--bg-selected)" : "var(--bg-surface)",

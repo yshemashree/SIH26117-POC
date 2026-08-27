@@ -76,7 +76,7 @@ export interface Deliverable {
   codeLang?: string;
 }
 
-export type Section = "chat" | "dashboard" | "knowledge" | "sandbox";
+export type Section = "chat" | "dashboard" | "knowledge" | "sandbox" | "vault";
 
 export type ApprovalState = "none" | "pending" | "approved" | "rejected";
 

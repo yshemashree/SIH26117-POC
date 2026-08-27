@@ -5,6 +5,7 @@ import { RightRail } from "../components/rail/RightRail";
 import { KnowledgeBase } from "../components/knowledge/KnowledgeBase";
 import { Sandbox } from "../components/sandbox/Sandbox";
 import { Dashboard } from "../components/dashboard/Dashboard";
+import { Vault } from "../components/vault/Vault";
 import { SCENARIOS } from "../lib/data";
 import { buildGenericScenario } from "../lib/generic";
 import { loadTurns, saveTurns, loadAuditLog, saveAuditLog, clearHistory } from "../lib/persist";
@@ -119,6 +120,7 @@ export default function Workbench() {
         )}
         {section === "dashboard" && <Dashboard turns={turns} auditLog={auditLog} />}
         {section === "knowledge" && <KnowledgeBase />}
+        {section === "vault" && <Vault turns={turns} />}
         {section === "sandbox" && <Sandbox />}
       </div>
     </div>

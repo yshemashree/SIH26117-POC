@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Library,
   TerminalSquare,
+  Archive,
   Sun,
   Moon,
   LogOut,
@@ -24,6 +25,7 @@ const NAV: { id: Section; label: string; icon: typeof MessageSquare }[] = [
   { id: "chat", label: "Agent Chat", icon: MessageSquare },
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "knowledge", label: "Knowledge Base", icon: Library },
+  { id: "vault", label: "Vault", icon: Archive },
   { id: "sandbox", label: "Sandbox", icon: TerminalSquare },
 ];
 
