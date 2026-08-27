@@ -7,6 +7,8 @@ import { Sandbox } from "../components/sandbox/Sandbox";
 import { LiveLogs } from "../components/livelogs/LiveLogs";
 import { ModelRouting } from "../components/routing/ModelRouting";
 import { Vault } from "../components/vault/Vault";
+import { OutputPreview } from "../components/chat/OutputPreview";
+import { PreviewProvider } from "../lib/previewContext";
 import { SCENARIOS } from "../lib/data";
 import { buildGenericScenario } from "../lib/generic";
 import { loadTurns, saveTurns, loadAuditLog, saveAuditLog, clearHistory } from "../lib/persist";
@@ -108,23 +110,26 @@ export default function Workbench() {
   const activeTurn = turns[turns.length - 1];
 
   return (
-    <div className="flex h-screen flex-col" style={{ background: "var(--bg-canvas)" }}>
-      <TopBar />
-      <div className="flex min-h-0 flex-1">
-        <Sidebar section={section} onSection={setSection} turns={turns} onSelectTurn={selectTurn} onNewSession={newSession} />
+    <PreviewProvider>
+      <div className="flex h-screen flex-col" style={{ background: "var(--bg-canvas)" }}>
+        <TopBar />
+        <div className="flex min-h-0 flex-1">
+          <Sidebar section={section} onSection={setSection} turns={turns} onSelectTurn={selectTurn} onNewSession={newSession} />
 
-        {section === "chat" && (
-          <>
-            <ChatPanel turns={turns} onSend={handleSend} onApprove={approveTurn} onReject={rejectTurn} />
-            <RightRail auditLog={auditLog} activeTurn={activeTurn} />
-          </>
-        )}
-        {section === "logs" && <LiveLogs turns={turns} auditLog={auditLog} />}
-        {section === "routing" && <ModelRouting turns={turns} auditLog={auditLog} />}
-        {section === "knowledge" && <KnowledgeBase />}
-        {section === "vault" && <Vault turns={turns} />}
-        {section === "sandbox" && <Sandbox />}
+          {section === "chat" && (
+            <>
+              <ChatPanel turns={turns} onSend={handleSend} onApprove={approveTurn} onReject={rejectTurn} />
+              <RightRail auditLog={auditLog} activeTurn={activeTurn} />
+            </>
+          )}
+          {section === "logs" && <LiveLogs turns={turns} auditLog={auditLog} />}
+          {section === "routing" && <ModelRouting turns={turns} auditLog={auditLog} />}
+          {section === "knowledge" && <KnowledgeBase />}
+          {section === "vault" && <Vault turns={turns} />}
+          {section === "sandbox" && <Sandbox />}
+        </div>
+        <OutputPreview />
       </div>
-    </div>
+    </PreviewProvider>
   );
 }

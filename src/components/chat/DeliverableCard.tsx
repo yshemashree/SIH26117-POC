@@ -1,23 +1,10 @@
-import { FileText, FileSpreadsheet, Presentation, Code2, Download, Eye, Loader2 } from "lucide-react";
+import { Download, Eye, Loader2 } from "lucide-react";
 import { useState } from "react";
 import type { Citation, Deliverable } from "../../lib/types";
-import { CodeBlock } from "../common/CodeBlock";
 import { CitationRow } from "../common/CitationRow";
 import { exportDeliverable } from "../../lib/exportFile";
-
-const ICONS: Record<Deliverable["type"], typeof FileText> = {
-  docx: FileText,
-  xlsx: FileSpreadsheet,
-  pptx: Presentation,
-  code: Code2,
-};
-
-const COLORS: Record<Deliverable["type"], string> = {
-  docx: "var(--brand-700)",
-  xlsx: "var(--safe-600)",
-  pptx: "var(--copper-600)",
-  code: "var(--accent)",
-};
+import { DELIVERABLE_ICON, DELIVERABLE_COLOR } from "../../lib/deliverableStyle";
+import { usePreview } from "../../lib/previewContext";
 
 export function DeliverableCard({
   deliverable,
@@ -28,10 +15,10 @@ export function DeliverableCard({
   locked: boolean;
   citations?: Citation[];
 }) {
-  const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const Icon = ICONS[deliverable.type];
-  const color = COLORS[deliverable.type];
+  const { open } = usePreview();
+  const Icon = DELIVERABLE_ICON[deliverable.type];
+  const color = DELIVERABLE_COLOR[deliverable.type];
 
   const handleExport = async () => {
     setExporting(true);
@@ -66,12 +53,12 @@ export function DeliverableCard({
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => open(deliverable, locked)}
             className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition-colors"
             style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
           >
             <Eye size={13} />
-            {open ? "Hide preview" : "Preview"}
+            Preview
           </button>
           <button
             onClick={handleExport}
@@ -89,51 +76,6 @@ export function DeliverableCard({
       {citations.length > 0 && (
         <div className="px-4 pb-3">
           <CitationRow citations={citations} />
-        </div>
-      )}
-
-      {open && (
-        <div className="border-t px-4 py-3.5" style={{ borderColor: "var(--border-subtle)" }}>
-          {deliverable.sections && (
-            <div className="flex flex-col gap-3">
-              {deliverable.sections.map((s) => (
-                <div key={s.heading}>
-                  <p className="text-[11.5px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                    {s.heading}
-                  </p>
-                  <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed" style={{ color: "var(--text-primary)" }}>
-                    {s.body}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-          {deliverable.code && <CodeBlock code={deliverable.code} lang={deliverable.codeLang ?? "python"} />}
-          {deliverable.rows && (
-            <div className="overflow-x-auto rounded-md border" style={{ borderColor: "var(--border-subtle)" }}>
-              <table className="w-full border-collapse text-[12px]">
-                <tbody>
-                  {deliverable.rows.map((row, i) => (
-                    <tr key={i} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)" }}>
-                      {row.map((cell, j) => (
-                        <td
-                          key={j}
-                          className="whitespace-nowrap px-3 py-1.5"
-                          style={{
-                            color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
-                            fontWeight: i === 0 ? 600 : 400,
-                            background: i === 0 ? "var(--bg-sunken)" : "transparent",
-                          }}
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       )}
     </div>

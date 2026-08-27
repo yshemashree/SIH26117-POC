@@ -222,12 +222,18 @@ function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () =>
       </div>
 
       <div className="flex min-w-0 flex-col">
-        <div className="mb-2 flex items-center gap-2">
-          <RakshakaMark size={16} />
+        <div className="mb-2.5 flex items-center gap-2.5">
+          <span
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+            style={{ background: "var(--bg-sunken)" }}
+          >
+            <RakshakaMark size={17} />
+          </span>
           <span className="text-[12.5px] font-medium" style={{ color: "var(--text-primary)" }}>Rakshaka</span>
+          <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>{turn.time}</span>
         </div>
 
-        <div className="pl-[26px]">
+        <div className="pl-[38px]">
           <AgentTrail steps={trailSteps} running={running} meta={trailMeta} />
 
           {approvalStep && (

@@ -33,30 +33,120 @@ const FILES = [
   },
 ];
 
-const BOOT_LINES = [
-  "$ rakshaka-sandbox boot",
-  "[boot] agentic task engine attached, session " + SESSION_ID,
-  "[boot] local model runtime: 6 models healthy",
-  "[boot] python 3.11.9 kernel ready, network egress disabled",
-  "[ready]",
+const BOOT_LINES: { text: string; tone: Tone }[] = [
+  { text: "$ rakshaka-sandbox boot", tone: "prompt" },
+  { text: "[boot] agentic task engine attached, session " + SESSION_ID, tone: "muted" },
+  { text: "[boot] local model runtime: 6 models healthy", tone: "muted" },
+  { text: "[boot] python 3.11.9 kernel ready, network egress disabled", tone: "muted" },
+  { text: "[ready]", tone: "muted" },
 ];
+
+type Tone = "prompt" | "muted" | "default" | "success";
+
+interface Line {
+  id: number;
+  text: string;
+  tone: Tone;
+}
+
+let lineCounter = 0;
 
 export function Sandbox() {
   const [openTabs, setOpenTabs] = useState<number[]>([0, 1]);
   const [active, setActive] = useState(0);
-  const [runState, setRunState] = useState<"idle" | "running" | "done">("idle");
-  const [bootRevealed, setBootRevealed] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [lines, setLines] = useState<Line[]>([]);
+  const [inputValue, setInputValue] = useState("");
   const termRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const pushLines = (texts: string[], tone: Tone = "default") => {
+    setLines((prev) => [...prev, ...texts.map((text) => ({ id: lineCounter++, text, tone }))]);
+  };
 
   useEffect(() => {
-    BOOT_LINES.forEach((_, i) => {
-      setTimeout(() => setBootRevealed((n) => Math.max(n, i + 1)), 180 * (i + 1));
+    BOOT_LINES.forEach((line, i) => {
+      setTimeout(() => pushLines([line.text], line.tone), 180 * (i + 1));
     });
   }, []);
 
   useEffect(() => {
     termRef.current?.scrollTo({ top: termRef.current.scrollHeight });
-  }, [bootRevealed, runState]);
+  }, [lines]);
+
+  const runPytest = (showPrompt = true) => {
+    if (running) return;
+    setRunning(true);
+    if (showPrompt) pushLines(["$ pytest -q test_kod_sizing.py"], "prompt");
+    setTimeout(() => {
+      pushLines(["passed"], "success");
+      pushLines(testOutput.split("\n"));
+      setRunning(false);
+    }, 900);
+  };
+
+  const handleCommand = (raw: string) => {
+    const cmd = raw.trim();
+    pushLines([`$ ${cmd || ""}`], "prompt");
+    if (!cmd) return;
+    const [name, ...args] = cmd.split(/\s+/);
+
+    switch (name) {
+      case "clear":
+        setLines([]);
+        return;
+      case "ls":
+        pushLines([FILES.map((f) => f.name).join("  ")]);
+        return;
+      case "pwd":
+        pushLines(["/workspace/rakshaka-sandbox"]);
+        return;
+      case "whoami":
+        pushLines(["rakshaka"]);
+        return;
+      case "python":
+      case "python3":
+        if (args[0] === "--version") {
+          pushLines(["Python 3.11.9"]);
+          return;
+        }
+        if (args[0]) {
+          const f = FILES.find((f) => f.name === args[0]);
+          pushLines(
+            f
+              ? [`${args[0]} imported, no output (module defines functions only, no __main__ block)`]
+              : [`python3: can't open file '${args[0]}': [Errno 2] No such file or directory`]
+          );
+          return;
+        }
+        pushLines(["Python 3.11.9 (main, sandbox build)", 'Type "help" for more information.']);
+        return;
+      case "pip":
+        if (args[0] === "list" || args[0] === "freeze") {
+          pushLines(FILES.find((f) => f.name === "requirements.txt")!.code.trim().split("\n"));
+          return;
+        }
+        pushLines(["usage: pip <list|freeze>"]);
+        return;
+      case "cat": {
+        const f = FILES.find((f) => f.name === args[0]);
+        pushLines(f ? f.code.trim().split("\n") : [`cat: ${args[0] ?? ""}: No such file or directory`]);
+        return;
+      }
+      case "pytest":
+        runPytest(false);
+        return;
+      case "echo":
+        pushLines([args.join(" ")]);
+        return;
+      case "help":
+        pushLines(["Available: ls, pwd, cat <file>, python --version, pip list, pytest -q, echo, clear, help"]);
+        return;
+      default:
+        pushLines([`bash: ${name}: command not found`]);
+        return;
+    }
+  };
 
   const openFile = (i: number) => {
     setOpenTabs((prev) => (prev.includes(i) ? prev : [...prev, i]));
@@ -72,12 +162,14 @@ export function Sandbox() {
     });
   };
 
-  const run = () => {
-    setRunState("running");
-    setTimeout(() => setRunState("done"), 900);
-  };
-
   const activeFile = active >= 0 ? FILES[active] : undefined;
+
+  const TONE_COLOR: Record<Tone, string> = {
+    prompt: "var(--text-primary)",
+    muted: "var(--text-tertiary)",
+    default: "var(--text-secondary)",
+    success: "var(--safe-600)",
+  };
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
@@ -103,12 +195,12 @@ export function Sandbox() {
           </span>
         </div>
         <button
-          onClick={run}
-          disabled={runState === "running"}
+          onClick={() => runPytest()}
+          disabled={running}
           className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12.5px] font-medium text-white transition-colors disabled:opacity-60"
           style={{ background: "var(--accent-solid)" }}
         >
-          {runState === "running" ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
+          {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
           Run tests
         </button>
       </div>
@@ -201,7 +293,7 @@ export function Sandbox() {
             )}
           </div>
 
-          <div className="border-t" style={{ borderColor: "var(--border-subtle)" }}>
+          <div className="flex h-56 flex-col border-t" style={{ borderColor: "var(--border-subtle)" }}>
             <div className="flex items-center gap-4 border-b px-4 pt-2" style={{ borderColor: "var(--border-subtle)" }}>
               <span
                 className="border-b-2 pb-2 text-[10.5px] font-semibold uppercase tracking-wide"
@@ -217,40 +309,38 @@ export function Sandbox() {
               </span>
             </div>
             <div
-              ref={termRef}
-              className="mono max-h-40 min-h-[110px] overflow-y-auto px-4 py-3 text-[12px] leading-relaxed"
+              onClick={() => inputRef.current?.focus()}
+              className="mono flex min-h-0 flex-1 flex-col text-[12px] leading-relaxed"
               style={{ background: "var(--bg-sunken)", color: "var(--text-secondary)" }}
             >
-              {BOOT_LINES.slice(0, bootRevealed).map((line, i) => (
-                <div key={i} style={{ color: line.startsWith("$") ? "var(--text-primary)" : "var(--text-tertiary)" }}>
-                  {line}
-                </div>
-              ))}
-              {bootRevealed >= BOOT_LINES.length && runState === "idle" && (
-                <div className="flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
-                  <span>$</span>
-                  <span className="caret">▍</span>
-                </div>
-              )}
-              {runState === "running" && (
-                <div className="flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-                  <span>$ pytest -q test_kod_sizing.py</span>
-                  <Loader2 size={12} className="animate-spin" />
-                </div>
-              )}
-              {runState === "done" && (
-                <div>
-                  <p style={{ color: "var(--text-primary)" }}>$ pytest -q test_kod_sizing.py</p>
-                  <p className="mt-1 flex items-center gap-1.5" style={{ color: "var(--safe-600)" }}>
-                    <CheckCircle2 size={13} /> passed
-                  </p>
-                  <pre className="mt-1 whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>{testOutput}</pre>
-                  <div className="mt-1 flex items-center gap-1">
-                    <span>$</span>
-                    <span className="caret">▍</span>
+              <div ref={termRef} className="min-h-0 flex-1 overflow-y-auto px-4 pt-3">
+                {lines.map((line) => (
+                  <div key={line.id} className="flex items-center gap-1.5">
+                    {line.tone === "success" && <CheckCircle2 size={12} style={{ color: "var(--safe-600)" }} />}
+                    <span style={{ color: TONE_COLOR[line.tone], whiteSpace: "pre-wrap" }}>{line.text}</span>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5 px-4 py-2.5">
+                <span style={{ color: "var(--text-primary)" }}>$</span>
+                <input
+                  ref={inputRef}
+                  autoFocus
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleCommand(inputValue);
+                      setInputValue("");
+                    }
+                  }}
+                  spellCheck={false}
+                  autoComplete="off"
+                  placeholder="type a command, try help"
+                  className="mono min-w-0 flex-1 bg-transparent text-[12px] outline-none"
+                  style={{ color: "var(--text-primary)" }}
+                />
+              </div>
             </div>
           </div>
         </div>
