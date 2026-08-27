@@ -1,7 +1,8 @@
 import { FileText, FileSpreadsheet, Presentation, Code2, Download, Eye, Loader2 } from "lucide-react";
 import { useState } from "react";
-import type { Deliverable } from "../../lib/types";
+import type { Citation, Deliverable } from "../../lib/types";
 import { CodeBlock } from "../common/CodeBlock";
+import { CitationRow } from "../common/CitationRow";
 import { exportDeliverable } from "../../lib/exportFile";
 
 const ICONS: Record<Deliverable["type"], typeof FileText> = {
@@ -18,7 +19,15 @@ const COLORS: Record<Deliverable["type"], string> = {
   code: "var(--accent)",
 };
 
-export function DeliverableCard({ deliverable, locked }: { deliverable: Deliverable; locked: boolean }) {
+export function DeliverableCard({
+  deliverable,
+  locked,
+  citations = [],
+}: {
+  deliverable: Deliverable;
+  locked: boolean;
+  citations?: Citation[];
+}) {
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const Icon = ICONS[deliverable.type];
@@ -76,6 +85,12 @@ export function DeliverableCard({ deliverable, locked }: { deliverable: Delivera
           </button>
         </div>
       </div>
+
+      {citations.length > 0 && (
+        <div className="px-4 pb-3">
+          <CitationRow citations={citations} />
+        </div>
+      )}
 
       {open && (
         <div className="border-t px-4 py-3.5" style={{ borderColor: "var(--border-subtle)" }}>

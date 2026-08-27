@@ -46,6 +46,11 @@ export type StepKind =
   | "approval"
   | "deliverable";
 
+export interface Citation {
+  doc: string;
+  page: string;
+}
+
 export interface AgentStep {
   id: string;
   kind: StepKind;
@@ -56,7 +61,7 @@ export interface AgentStep {
   code?: string;
   codeLang?: string;
   output?: string;
-  citations?: { doc: string; page: string }[];
+  citations?: Citation[];
   status?: "done" | "running" | "pending" | "blocked";
   durationMs?: number;
 }
