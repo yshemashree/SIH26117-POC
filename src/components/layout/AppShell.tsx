@@ -10,6 +10,9 @@ import {
   ChevronDown,
   ShieldCheck,
   Clock,
+  CheckCircle2,
+  XCircle,
+  SquarePen,
 } from "lucide-react";
 import { useTheme } from "../../lib/theme";
 import { useAuth } from "../../lib/auth";
@@ -105,20 +108,41 @@ export function TopBar() {
   );
 }
 
+const STATUS_ICON = {
+  pending: { icon: Clock, color: "var(--copper-600)" },
+  approved: { icon: CheckCircle2, color: "var(--safe-600)" },
+  rejected: { icon: XCircle, color: "var(--alert-600)" },
+  none: { icon: Clock, color: "var(--text-tertiary)" },
+} as const;
+
 export function Sidebar({
   section,
   onSection,
   turns,
+  onSelectTurn,
+  onNewSession,
 }: {
   section: Section;
   onSection: (s: Section) => void;
   turns: Turn[];
+  onSelectTurn: (turnId: string) => void;
+  onNewSession: () => void;
 }) {
   return (
     <aside
       className="flex w-60 shrink-0 flex-col border-r"
       style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
     >
+      <div className="px-3 pt-3">
+        <button
+          onClick={onNewSession}
+          className="flex w-full items-center gap-2.5 rounded-md border px-2.5 py-2 text-left text-[13px] font-medium transition-colors"
+          style={{ borderColor: "var(--border-default)", color: "var(--text-secondary)" }}
+        >
+          <SquarePen size={14} />
+          New session
+        </button>
+      </div>
       <nav className="flex flex-col gap-0.5 p-3">
         {NAV.map(({ id, label, icon: Icon }) => {
           const active = section === id;
@@ -150,18 +174,25 @@ export function Sidebar({
             Nothing run yet this session. Try a sample prompt from the composer.
           </p>
         )}
-        <ul className="flex flex-col gap-1">
-          {[...turns].reverse().map((t) => (
-            <li key={t.id}>
-              <div
-                className="flex items-start gap-2 rounded-md px-2 py-1.5 text-[12px]"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                <Clock size={12} className="mt-0.5 shrink-0" style={{ color: "var(--text-tertiary)" }} />
-                <span className="line-clamp-2 leading-snug">{t.scenario.label}</span>
-              </div>
-            </li>
-          ))}
+        <ul className="flex flex-col gap-0.5">
+          {[...turns].reverse().map((t) => {
+            const { icon: StatusIcon, color } = STATUS_ICON[t.approval];
+            return (
+              <li key={t.id}>
+                <button
+                  onClick={() => onSelectTurn(t.id)}
+                  className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-[12px] transition-colors"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  <StatusIcon size={12} className="mt-0.5 shrink-0" style={{ color }} />
+                  <span className="min-w-0 flex-1">
+                    <span className="line-clamp-2 block leading-snug">{t.scenario.label}</span>
+                    <span className="mono text-[10px]" style={{ color: "var(--text-tertiary)" }}>{t.time}</span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </div>
 

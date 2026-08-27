@@ -159,7 +159,7 @@ function TurnBlock({ turn, onApprove, onReject }: { turn: Turn; onApprove: () =>
   const locked = approval === "pending";
 
   return (
-    <div className="flex flex-col gap-4 border-b py-6 first:pt-0" style={{ borderColor: "var(--border-subtle)" }}>
+    <div id={turn.id} className="flex scroll-mt-4 flex-col gap-4 border-b py-6 first:pt-0" style={{ borderColor: "var(--border-subtle)" }}>
       <div className="flex items-start gap-3">
         <span
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
@@ -392,7 +392,7 @@ export function ChatPanel({
               onClick={() => submit(value)}
               disabled={!value.trim()}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-white transition-colors disabled:opacity-40"
-              style={{ background: "var(--accent-strong)" }}
+              style={{ background: "var(--accent-solid)" }}
             >
               <Send size={14} />
             </button>

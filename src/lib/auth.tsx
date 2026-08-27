@@ -9,11 +9,11 @@ export interface WorkbenchUser {
 }
 
 const DEMO_USER: WorkbenchUser = {
-  name: "Ananya Shetty",
-  email: "a.shetty@mrpl.co.in",
+  name: "Y S Hemashree",
+  email: "hemashree.ys@mrpl.co.in",
   role: "Process Engineer",
   department: "Refinery Operations",
-  initials: "AS",
+  initials: "YH",
 };
 
 interface AuthContextValue {
